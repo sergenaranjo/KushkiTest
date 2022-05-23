@@ -10,7 +10,6 @@
 						class="form-control"
 						id="inputToken"
 						v-model="inputToken"
-						disabled
 						required
 					/>
 				</div>
@@ -99,10 +98,10 @@
 					/>
 				</div>
 			</div>
-			<button class="btn btn-xs btn-primary" @click="requestSubscriptionToken">
+			<button class="btn btn-xs btn-primary" @click="requestSubscription">
 				Crear Suscripción
 			</button>
-			<!--<div v-show="callbackFail || callbackSuccess" class="row my-5">
+			<div v-show="callbackFail || callbackSuccess" class="row my-5">
 				<div
 					class="alert"
 					:class="{
@@ -113,19 +112,26 @@
 				>
 					{{ callbackMessage }}
 				</div>
-			</div>-->
+			</div>
 		</div>
 	</div>
 </template>
 
 <script>
+
+import { toRef } from 'vue'
+
 export default {
 	name: "CreateSubscription",
-	props: {
-		msg: String,
+	setup(props) {
+	const token = toRef(props, 'token')
+	return { token }
 	},
 	data() {
 		return {
+			callbackFail: false,
+			callbackSuccess: false,
+			callbackMessage: "",
 			inputToken: "",
 			inputPlanName: "",
 			inputDocumentType: "",
@@ -135,6 +141,73 @@ export default {
 			inputLastName: "",
 		};
 	},
-	methods: {},
+	created: function () {
+		this.inputToken = this.token;
+	},
+	methods: {
+		requestSubscription(
+		) {
+
+			fetch("https://stoplight.io/mocks/api-kushki-docs/api-reference/59467660/subscriptions/v1/card", {
+			"method": "POST",
+			"headers": {
+				"Content-Type": "application/json",
+				"Public-Merchant-Id": "20000000108750050000"
+			},
+			"body": "{\"token\":\""+this.inputToken+"\",\"planName\":\""+this.inputPlanName+"\",\"periodicity\":\"monthly\",\"contactDetails\":{\"documentType\":\""+this.inputDocumentType+"\",\"documentNumber\":\""+this.inputDocumentNumber+"\",\"email\":\""+this.inputEmail+"\",\"firstName\":\""+this.inputFirstName+"\",\"lastName\":\""+this.inputLastName+"\",\"phoneNumber\":\"+593912345678\"},\"amount\":{\"subtotalIva\":1,\"subtotalIva0\":0,\"ice\":0,\"iva\":0.14,\"currency\":\"USD\"},\"startDate\":\"2022-05-25\",\"metadata\":{\"plan\":{\"fitness\":{\"cardio\":\"include\",\"rumba\":\"include\",\"pool\":\"include\"}}}}"
+			})
+			.then((res) => res.json())
+			.then((response) => {
+				this.callbackSuccess = true;
+				this.callbackMessage = "Se ha creado la suscripción con el ID: "+response.subscriptionId;
+			})
+			.catch(err => {
+				this.callbackFail = true;
+				this.callbackMessage =
+					"Error: " +
+					err.error +
+					". Code: " +
+					err.code +
+					". Message: " +
+					err.message;
+			});
+			/*
+			fetch("https://stoplight.io/mocks/api-kushki-docs/api-reference/59467660/subscriptions/v1/card/tokens", {
+			"method": "POST",
+			"headers": {
+				"Content-Type": "application/json",
+				"Public-Merchant-Id": "20000000108750050000"
+			},
+			"body": {
+				"card":{
+					"name":inputName,
+					"number":inputNumber,
+					"expiryMonth":inputExpiryMonth,
+					"expiryYear":inputExpiryYear,
+					"cvv":inputCVC
+				},
+				"currency":"USD"
+				}
+			})
+			.then(response => {
+				this.$emit("sendToken", response.token);
+				this.callbackSuccess = true;
+				this.callbackMessage = response.token;
+				this.token = response.token;			
+			})
+			.catch(err => {
+				this.$emit("sendToken", "No hay token");
+				this.callbackFail = true;
+				this.callbackMessage =
+					"Error: " +
+					err.error +
+					". Code: " +
+					err.code +
+					". Message: " +
+					err.message;
+			});
+			*/
+		},
+	},
 };
 </script>

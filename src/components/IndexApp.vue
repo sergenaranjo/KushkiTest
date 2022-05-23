@@ -5,7 +5,7 @@
 			<RequestToken @sendToken="catchToken" />
 		</div>
 		<div v-show="activeMenu == 'subscription'">
-			<CreateSubscription />
+			<CreateSubscription :token="token" />
 		</div>
 		<div v-show="activeMenu == 'tokenPayment'">
 			<RequestTokenPayment />
@@ -41,11 +41,12 @@ export default {
 	data() {
 		return {
 			activeMenu: "token",
+			token:"",
 		};
 	},
 	methods: {
 		catchToken(token) {
-			console.log(token);
+			this.token = token
 		},
 		changeMenu(menu) {
 			this.activeMenu = menu;

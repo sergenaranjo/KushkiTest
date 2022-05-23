@@ -94,7 +94,9 @@
 </template>
 
 <script>
+/*
 import { Kushki } from "@kushki/js";
+*/
 
 export default {
 	name: "RequestToken",
@@ -117,12 +119,36 @@ export default {
 	},
 	methods: {
 		requestSubscriptionToken(
-			inputName,
-			inputNumber,
-			inputCVC,
-			inputExpiryMonth,
-			inputExpiryYear
 		) {
+
+			fetch("https://stoplight.io/mocks/api-kushki-docs/api-reference/59467660/subscriptions/v1/card/tokens", {
+			"method": "POST",
+			"headers": {
+				"Content-Type": "application/json",
+				"Public-Merchant-Id": "20000000108750050000"
+			},
+			"body": "{\"card\":{\"name\":\""+this.inputName+"\",\"number\":\""+this.inputNumber+"\",\"expiryMonth\":\""+this.inputExpiryMonth+"\",\"expiryYear\":\""+this.inputExpiryYear+"\",\"cvv\":\""+this.inputCVC+"\"},\"currency\":\"USD\"}"
+			})
+			.then((res) => res.json())
+			.then((response) => {
+				this.$emit("sendToken", response.token);
+				this.callbackSuccess = true;
+				this.callbackMessage = "Se ha asignado el token: "+response.token;
+				this.token = response.token;
+			})
+			.catch(err => {
+				this.$emit("sendToken", "No hay token");
+				this.callbackFail = true;
+				this.callbackMessage =
+					"Error: " +
+					err.error +
+					". Code: " +
+					err.code +
+					". Message: " +
+					err.message;
+			});
+
+			/* Implementación por Kushki.js
 			var callback = async (response) => {
 				if (!response.code) {
 					this.$emit("sendToken", response.token);
@@ -155,13 +181,16 @@ export default {
 				},
 				callback
 			);
+			*/
 		},
 	},
 };
 
+/* Implementación por Kushki.js
 var kushki = new Kushki({
-	merchantId: "20000000106921624000",
+	merchantId: "20000000108750050000",
 	inTestEnvironment: true,
 	regional: false,
 });
+*/
 </script>
